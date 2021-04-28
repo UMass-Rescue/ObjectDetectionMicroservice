@@ -1,17 +1,12 @@
 # Model Design Template
 
-This template was created to speed up the model design and development process.
-If the model passes the test cases in this application, then it will also work in
+This model is designed accoding to the template in [UniversalModelTemaplate](https://github.com/UMass-Rescue/UniversalModelTemplate). The model passes the test cases in this application, and should work in
 the context of the server.
 
 ## Getting Started
-In the model directory, fill out the code in `model.py` and `config.py` according to
-the directions in each file. Then, add the requirements for your project into the
-`requirements.py` file in the model directory. You may add any supporting files or
-folders that your model needs under the model directory.
-
-**Important: All code that your model uses or references *MUST* be contained in the
-model directory.**
+In the model directory, the code in `model.py` uses the pretrained [FasterRCNN](https://pytorch.org/vision/stable/_modules/torchvision/models/detection/faster_rcnn.html) model in PyTorch to detect objects with prediction scores greater than **0.75**. This model is trained on the MS-COCO dataset with has [80 classes](https://cocodataset.org/#explore)  of objects (excluding background).
+In `model/coco_labels_super.json`, the classes are grouped into 10 super-classes:- *person*, *modes of transport*, *street view*, *animals*, *sports*, *food*, *kitchen*, *indoor*, *electronis*, and *misc*. 
+`config.py` has some metadata about the ML model, e.g. input type, model name, and tags. The requirements are added to `requirements.py` file in the model directory. 
 
 
 ## Debugging your Model
