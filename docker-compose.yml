@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  debug:
+    command: uvicorn main:app --host 0.0.0.0 --port 4650 --debug --reload-dir /app --log-level debug
+    build:
+      context: .
+      dockerfile: debug.Dockerfile
+    volumes:
+      - ./debug:/app
+      - ./model:/app/model
+      - ./test/images:/app/images
+    environment:
+      - GUNICORN_CMD_ARGS="--reload"
+    ports:
+      - 4650:4650
+
+  test:
+    command: pytest test.py
+    build:
+      context: .
+      dockerfile: test.Dockerfile
+    volumes:
+      - ./model:/app/model
+      - ./test/images:/app/images
