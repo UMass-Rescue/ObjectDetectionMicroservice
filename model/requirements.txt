@@ -2,3 +2,5 @@ pillow
 requests
 rq
 redis
+torch
+torchvision

@@ -1,8 +1,14 @@
-from typing import List
-
 from PIL import Image
-import time
+import time, json
+from torchvision import models, transforms
+import torch
 
+model = None
+label_map = {}
+super_COCO_classes ={}
+classes = []
+result = {}
+score_threshold = 0.75
 
 def init():
     """
@@ -10,7 +16,35 @@ def init():
     model needs have been created, and if not then you should create/fetch them.
     """
     # Placeholder init code. Replace the sleep with check for model files required etc...
-    time.sleep(1)
+    #load FasterRCNN model using ResNet trained on COCO
+    global model, label_map, super_COCO_classes, classes, result, score_threshold
+
+    USE_GPU = True
+    if USE_GPU and torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+
+    model = models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+    model.eval()
+    #read classes
+    labels = open('model/coco_labels.txt', 'r')
+    for line in labels:
+        ids = line.split(',')
+        label_map[int(ids[0])] = ids[2]
+    # read super classes from json file
+    with open('model/coco_labels_super.json', 'r') as fp:
+        temp = json.load(fp)
+    #changing keys to ',' separated labels to single labels
+    for k in temp:
+        class_labels = k.split(',')
+        classes.append(temp[k])
+        result[temp[k]] = 0
+        for label in class_labels:
+            if label not in super_COCO_classes:
+                super_COCO_classes[label] = temp[k]
+            else:
+                super_COCO_classes[label] += ', '+ temp[k]
 
 
 def predict(prediction_input):
@@ -32,38 +66,25 @@ def predict(prediction_input):
     image = Image.open('/app/images/'+image_file_name)
     """
 
-    text_input = prediction_input  # If text model
-    image = Image.open('/app/images/' + prediction_input)  # If image model
+    global model, label_map, super_COCO_classes, classes, result, score_threshold
+    image = Image.open('/app/images/' + prediction_input)
+    image_tensor = transforms.functional.to_tensor(image)
+
+    output = model([image_tensor])
+    for i in range(len(output)):
+        scores = output[i]['scores'].tolist()
+        # boxes = output[i]['boxes'].tolist()
+        labels = output[i]['labels'].tolist()
+        
+        for index, score in enumerate(scores):
+            if score > score_threshold:
+                label = label_map[labels[index]].strip() #remove leading and trailing spaces if any
+                if label in super_COCO_classes:
+                    result[super_COCO_classes[label]] += 1
+                
+
 
     return {
-        'classes': ['isGreen', 'isRed'],  # List every class in the classifier
-        'result': {  # For results, use the class names above with the result value
-            'isGreen': 0,
-            'isRed': 1
-        }
+        'classes': classes,  # List every class in the classifier
+        'result': result # For results, use the class names above with the result value            
     }
-
-
-def predict_batch(prediction_inputs: List[str]):
-    """
-    Create a batch prediction. This should have the same functionality as the predict function, however it
-    will allow for any optimizations.
-
-    This will be passed prediction inputs of length "batch_size", configurable in the model/config.py
-    batch_size variable.
-
-    If your model does not support batch prediction, you may disregard this method and your model will
-    still be completely functional.
-
-    The return signature for this message is a dictionary, with each key being the name of a prediction input in
-    prediction_inputs, and each value being the same format as what is returned in the singular predict() method.
-
-    """
-
-    results = {}
-
-    # This is a placeholder if your code does not have any batch optimizations.
-    for prediction_input in prediction_inputs:
-        results[prediction_input] = predict(prediction_input)
-
-    return results

@@ -33,7 +33,8 @@ def attempt_predict():
     try:
         predict_status = 'In Progress...'
         from model.model import predict
-        predict_result = predict('1.png')
+        predict_result = predict('COCO_val2014_000000581394.jpg')
+        # predict_result = predict('COCO_val2014_000000488977.jpg')
         predict_status = 'Successful'
         predict_error = ''
     except:
