@@ -4,8 +4,8 @@ This model is designed accoding to the template in [UniversalModelTemaplate](htt
 
 In the model directory, the code in `model.py` uses the pretrained [FasterRCNN](https://pytorch.org/vision/stable/_modules/torchvision/models/detection/faster_rcnn.html) model in PyTorch to detect objects with prediction scores greater than **0.75**. 
 
-This model is trained on the MS-COCO dataset with has [80 classes](https://cocodataset.org/#explore)  of objects (excluding background).
-In `model/coco_labels_super.json`, the classes are grouped into 10 super-classes. The model eturns the number of objects detected in each of the super-classes. 
+This model is trained on the MS-COCO dataset which has [80 classes](https://cocodataset.org/#explore)  of objects (excluding background).
+In `model/coco_labels_super.json`, these classes are grouped into 10 super-classes. The model returns the number of objects detected in each of the super-classes. 
 
 Super-class         | COCO Class Label
 ------------------- | -------------
